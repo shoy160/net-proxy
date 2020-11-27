@@ -5,10 +5,10 @@ proxy:
   config:
     local-port: 8023
     remote-ip: 172.29.0.94
-  list:
-    - local-port: 8022
-      remote-ip: 192.168.38.128
-      remote-port: 22
+#  list:
+#    - local-port: 8022
+#      remote-ip: 192.168.38.128
+#      remote-port: 22
   input-percent: "35.2"
   output-percent: "42.6"
   input-rate: 8652

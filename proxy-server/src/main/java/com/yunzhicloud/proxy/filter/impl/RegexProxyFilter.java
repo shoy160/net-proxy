@@ -27,15 +27,16 @@ public abstract class RegexProxyFilter implements ProxyFilter {
     }
 
     @Override
-    public void invoke(byte[] data) {
+    public byte[] transfer(byte[] data) {
         log.info("{} invoke", getClass().getSimpleName());
-        execute(data);
+        return execute(data);
     }
 
     /**
      * 执行过滤
      *
      * @param data 数据源
+     * @return byte[]
      */
-    protected abstract void execute(byte[] data);
+    protected abstract byte[] execute(byte[] data);
 }

@@ -20,6 +20,7 @@ public interface ProxyFilter {
      * 数据转换
      *
      * @param data 数据源
+     * @return byte[]
      */
-    void invoke(byte[] data);
+    byte[] transfer(byte[] data);
 }

@@ -1,6 +1,7 @@
 package com.yunzhicloud.proxy.filter;
 
-import com.yunzhicloud.proxy.util.CommonUtils;
+import cn.hutool.core.io.BufferUtil;
+import com.yunzhicloud.proxy.util.BufferUtils;
 import com.yunzhicloud.proxy.util.SpringUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -22,13 +23,13 @@ public class TransferManager {
     }
 
     public ByteBuf transferMsg(ByteBuf buf) {
-        String content = CommonUtils.byteToString(buf);
-        log.info("back proxy read {},{},{}", content, buf.readableBytes(), buf.readerIndex());
+        String content = BufferUtils.byteToString(buf);
+        log.info("back proxy read {}", content);
         byte[] data = new byte[buf.readableBytes()];
         buf.readBytes(data);
         for (ProxyFilter filter : filters.values()) {
             if (filter.isMatch(content)) {
-                filter.invoke(data);
+                data = filter.transfer(data);
             }
         }
         ReferenceCountUtil.release(buf);

@@ -1,11 +1,8 @@
 package com.yunzhicloud.proxy.filter.impl;
 
-import com.yunzhicloud.proxy.config.ProxyConfig;
-import com.yunzhicloud.proxy.util.CommonUtils;
+import com.yunzhicloud.proxy.util.BufferUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * @author shay
@@ -15,15 +12,16 @@ import javax.annotation.Resource;
 @Component
 public class DisplayInt01Filter extends RegexProxyFilter {
 
-    private final static String REGEX = "^\\.\\.Last\\s+5\\s+minutes\\s+input\\s+rate.*$";
+    private final static String REGEX = "^\\r\\nLast\\s+5\\s+minutes\\s+input\\s+rate.*$";
 
     protected DisplayInt01Filter() {
         super(REGEX);
     }
 
     @Override
-    protected void execute(byte[] data) {
-        CommonUtils.replaceBytes(data, config.getInputRate(), 29);
-        CommonUtils.replaceBytes(data, config.getInputPackets(), 43);
+    protected byte[] execute(byte[] data) {
+        BufferUtils.replaceBytes(data, config.getInputRate(), 29);
+        BufferUtils.replaceBytes(data, config.getInputPackets(), 43);
+        return data;
     }
 }
