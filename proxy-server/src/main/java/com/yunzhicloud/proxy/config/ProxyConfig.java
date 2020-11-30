@@ -1,14 +1,10 @@
 package com.yunzhicloud.proxy.config;
 
-import io.netty.handler.logging.LogLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author shay
@@ -21,10 +17,21 @@ public class ProxyConfig {
     private ProxyListenerConfig[] list;
     @NestedConfigurationProperty
     private ProxyListenerConfig config;
-    private String inputRate;
-    private String inputPackets;
-    private String outputRate;
-    private String outputPackets;
-    private String inputPercent;
-    private String outputPercent;
+
+    /**
+     * 设备ID
+     */
+    private String deviceId;
+    /**
+     * 入网流量 bits
+     */
+    private Long inputRate;
+    /**
+     * 出网流量 bits
+     */
+    private Long outputRate;
+    /**
+     * 总带宽 GB
+     */
+    private Long total = 160L;
 }

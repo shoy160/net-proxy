@@ -41,6 +41,15 @@ public class BufferUtils {
         return content.toString();
     }
 
+    public static String byteToString(byte[] data) {
+        initChars();
+        StringBuilder content = new StringBuilder();
+        for (byte datum : data) {
+            content.append(BYTE2CHAR[datum]);
+        }
+        return content.toString();
+    }
+
     public static byte[] stringToBytes(String msg) {
         byte[] bytes = new byte[msg.length()];
         final char[] chars = msg.toCharArray();

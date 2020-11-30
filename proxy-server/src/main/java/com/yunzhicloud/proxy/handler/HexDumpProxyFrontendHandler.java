@@ -59,8 +59,6 @@ public class HexDumpProxyFrontendHandler extends BaseHandlerAdapter {
 
                     }
                 });
-//                .handler(new DelimiterBasedFrameDecoder(2048, delimiter))
-//                .handler(new HexDumpProxyBackendHandler(inboundChannel));
         ChannelFuture f = b.connect(remoteHost, remotePort);
         outboundChannel = f.channel();
         f.addListener((ChannelFutureListener) future -> {
@@ -82,8 +80,6 @@ public class HexDumpProxyFrontendHandler extends BaseHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
         if (outboundChannel.isActive()) {
-//            String command = CommonUtils.byteToString((ByteBuf) msg);
-//            outboundChannel.attr(COMMAND_ATTR).set(command);
             outboundChannel
                     .writeAndFlush(msg)
                     .addListener((ChannelFutureListener) future -> {

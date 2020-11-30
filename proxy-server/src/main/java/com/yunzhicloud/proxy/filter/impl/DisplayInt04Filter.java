@@ -1,6 +1,6 @@
 package com.yunzhicloud.proxy.filter.impl;
 
-import com.yunzhicloud.proxy.util.BufferUtils;
+import com.yunzhicloud.proxy.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class DisplayInt04Filter extends RegexProxyFilter {
 
-    private final static String REGEX = "^(\\r\\n)?.*Output\\s+bandwidth\\s+utilization.*$";
+    private final static String REGEX = "Output\\s+bandwidth\\s+utilization\\s+:\\s+([0-9]+\\.[0-9]+%)";
 
     protected DisplayInt04Filter() {
         super(REGEX);
     }
 
     @Override
-    protected byte[] execute(byte[] data) {
-        BufferUtils.replaceBytes(data, config.getOutputPercent(), 37);
-        return data;
+    protected String execute(String data) {
+        double percent = config.getOutputRate() * 100D / (config.getTotal() * 1024 * 1024 * 1024 * 8);
+        return RegexUtils.replace(REGEX, data, 1, String.format("%.2f%%", percent));
     }
 }

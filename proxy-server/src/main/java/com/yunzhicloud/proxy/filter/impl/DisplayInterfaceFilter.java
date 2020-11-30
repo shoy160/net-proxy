@@ -1,6 +1,6 @@
 package com.yunzhicloud.proxy.filter.impl;
 
-import com.yunzhicloud.proxy.util.BufferUtils;
+import com.yunzhicloud.proxy.util.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -9,21 +9,19 @@ import org.springframework.stereotype.Component;
  * @date 2020/11/27
  */
 @Slf4j
-@Component
+//@Component
 public class DisplayInterfaceFilter extends RegexProxyFilter {
-    private final static String NET0_REGEX = "^\\r\\nEthernet0/0/0\\s+up\\s+up.*$";
+    private final static String NET0_REGEX = "Ethernet0/0/0\\s+up\\s+up\\s+([^\\s]+\\s+[^\\s]+)";
 
     protected DisplayInterfaceFilter() {
         super(NET0_REGEX);
     }
 
     @Override
-    protected byte[] execute(byte[] data) {
-        //InUti
-        BufferUtils.replaceBytes(data, config.getInputPercent(), 46);
-        //OutUti
-        BufferUtils.replaceBytes(data, config.getOutputPercent(), 53);
-        String message = "\r\nshay 001";
-        return BufferUtils.combineBytes(data, message);
+    protected String execute(String content) {
+        double input = config.getInputRate() * 100D / config.getTotal();
+        double output = config.getOutputRate() * 100D / config.getTotal();
+        String replacement = String.format("%.2f%%  %.2f%%", input, output);
+        return RegexUtils.replace(NET0_REGEX, content, 1, replacement);
     }
 }

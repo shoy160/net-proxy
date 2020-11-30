@@ -11,16 +11,17 @@ public interface ProxyFilter {
     /**
      * 是否匹配规则
      *
-     * @param content 内容
+     * @param data       内容
+     * @param eth        网卡名称
+     * @param startIndex 开始位置
      * @return boolean
      */
-    boolean isMatch(String content);
+    boolean isMatch(String data, String eth, Integer startIndex);
 
     /**
      * 数据转换
      *
-     * @param data 数据源
      * @return byte[]
      */
-    byte[] transfer(byte[] data);
+    String transfer();
 }

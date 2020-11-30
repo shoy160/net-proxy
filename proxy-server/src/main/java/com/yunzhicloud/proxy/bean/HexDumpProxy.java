@@ -46,7 +46,7 @@ public final class HexDumpProxy implements Runnable {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new HexDumpProxyInitializer(this.config.getRemoteIp(), this.config.getRemotePort()))
                     .childOption(ChannelOption.AUTO_READ, false);
 
