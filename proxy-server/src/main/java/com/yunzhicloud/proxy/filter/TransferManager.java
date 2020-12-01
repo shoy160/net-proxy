@@ -1,9 +1,12 @@
 package com.yunzhicloud.proxy.filter;
 
+import com.yunzhicloud.proxy.config.Constants;
 import com.yunzhicloud.proxy.util.BufferUtils;
 import com.yunzhicloud.proxy.util.SpringUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,29 +22,25 @@ import java.util.regex.Pattern;
 public class TransferManager {
     private final Map<String, ProxyFilter> filters;
     private String ethName;
-    private String prefixContent = "";
+
     private final static String ETH_REGEX = "((Ethernet[0-9/]+)|(Eth-Trunk[0-9/]+)|(Route-Aggregation[0-9/]+))\\s+current\\s+state\\s+:\\s+UP";
 
     public TransferManager() {
         filters = SpringUtils.getBeans(ProxyFilter.class);
     }
 
-    public ByteBuf transferMsg(ByteBuf buf) {
+    public ByteBuf transferMsg(ByteBuf buf, Channel channel) {
         String content = BufferUtils.byteToString(buf);
         Matcher matcher = Pattern.compile(ETH_REGEX).matcher(content);
         if (matcher.find()) {
             ethName = matcher.group(1);
         }
-        //缓存上一段响应信息，减少出错率
-        content = prefixContent.concat(content);
-        log.debug("begin transfer: {}", content);
+        log.info("begin transfer: {}", content);
         for (ProxyFilter filter : filters.values()) {
-            if (filter.isMatch(content, ethName, prefixContent.length() + 1)) {
+            if (filter.isMatch(content, ethName, 0)) {
                 content = filter.transfer();
             }
         }
-        content = content.substring(prefixContent.length());
-        prefixContent = content;
         ReferenceCountUtil.release(buf);
         return Unpooled.wrappedBuffer(BufferUtils.stringToBytes(content));
     }

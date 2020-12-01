@@ -25,6 +25,12 @@ public class BufferUtils {
         initTag = true;
     }
 
+    public static String toHex(ByteBuf buf) {
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.getBytes(buf.readerIndex(), bytes);
+        return HexUtil.encodeHexStr(bytes);
+    }
+
     public static String toHex(byte[] bytes) {
         return HexUtil.encodeHexStr(bytes);
     }

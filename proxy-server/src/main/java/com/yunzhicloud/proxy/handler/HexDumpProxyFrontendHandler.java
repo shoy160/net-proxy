@@ -15,18 +15,13 @@
  */
 package com.yunzhicloud.proxy.handler;
 
+import com.yunzhicloud.proxy.config.Constants;
 import com.yunzhicloud.proxy.util.BufferUtils;
-import com.yunzhicloud.proxy.util.CommonUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,6 +33,7 @@ public class HexDumpProxyFrontendHandler extends BaseHandlerAdapter {
     private final String remoteHost;
     private final int remotePort;
     private Channel outboundChannel;
+    private final static String ENTER_HEX = "0d0a";
 
     public HexDumpProxyFrontendHandler(String remoteHost, int remotePort) {
         this.remoteHost = remoteHost;
@@ -54,7 +50,7 @@ public class HexDumpProxyFrontendHandler extends BaseHandlerAdapter {
                     @Override
                     protected void initChannel(NioSocketChannel channel) {
                         channel.pipeline()
-//                                .addLast(new DelimiterBasedFrameDecoder(8192, false, Delimiters.lineDelimiter()))
+                                .addLast(new LimiterHandler())
                                 .addLast(new HexDumpProxyBackendHandler(inboundChannel));
 
                     }
@@ -80,6 +76,11 @@ public class HexDumpProxyFrontendHandler extends BaseHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
         if (outboundChannel.isActive()) {
+            if (msg instanceof ByteBuf) {
+                String hex = BufferUtils.toHex((ByteBuf) msg);
+                log.info("cmd:{}", hex);
+                outboundChannel.attr(Constants.ATTR_STDOUT).set(hex.equals(ENTER_HEX));
+            }
             outboundChannel
                     .writeAndFlush(msg)
                     .addListener((ChannelFutureListener) future -> {

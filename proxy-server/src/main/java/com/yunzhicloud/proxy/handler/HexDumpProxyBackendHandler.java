@@ -42,7 +42,7 @@ public class HexDumpProxyBackendHandler extends BaseHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
-        msg = transferManager.transferMsg((ByteBuf) msg);
+        msg = transferManager.transferMsg((ByteBuf) msg, ctx.channel());
         inboundChannel
                 .writeAndFlush(msg)
                 .addListener((ChannelFutureListener) future -> {
