@@ -1,7 +1,7 @@
 package com.github.shoy160.proxy;
 
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.handler.HexDumpProxyFrontendHandler;
+import com.github.shoy160.proxy.handler.TcpProxyFrontendHandler;
 import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -30,6 +30,6 @@ public class HexDumpProxyInitializer extends ChannelInitializer<SocketChannel> {
         if (adapter != null) {
             adapter.onFrontendPipeline(ch.pipeline());
         }
-        ch.pipeline().addLast(new HexDumpProxyFrontendHandler(remoteHost, remotePort));
+        ch.pipeline().addLast(new TcpProxyFrontendHandler(remoteHost, remotePort));
     }
 }

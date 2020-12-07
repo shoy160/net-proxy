@@ -16,7 +16,7 @@ public interface ChannelAdapter {
      * @param channel channel
      * @return msg
      */
-    Object onFrontend(ByteBuf buf, Channel channel);
+    ByteBuf onFrontend(ByteBuf buf, Channel channel);
 
     /**
      * 输出流程线
@@ -40,5 +40,5 @@ public interface ChannelAdapter {
      * @param channel channel
      * @return msg
      */
-    Object onBackend(ByteBuf buf, Channel channel);
+    ByteBuf onBackend(ByteBuf buf, Channel channel);
 }

@@ -14,14 +14,13 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2020/12/2
  */
 @Slf4j
-public class HexDumpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
+public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
 
     private final String remoteHost;
     private final int remotePort;
     private Channel outboundChannel;
-    private final static String ENTER_HEX = "0d0a";
 
-    public HexDumpProxyFrontendHandler(String remoteHost, int remotePort) {
+    public TcpProxyFrontendHandler(String remoteHost, int remotePort) {
         this.remoteHost = remoteHost;
         this.remotePort = remotePort;
     }
@@ -40,8 +39,7 @@ public class HexDumpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
                             adapter.onBackendPipeline(channel.pipeline());
                         }
                         channel.pipeline()
-//                                .addLast(new LimiterHandler())
-                                .addLast(new HexDumpProxyBackendHandler(inboundChannel));
+                                .addLast(new TcpProxyBackendHandler(inboundChannel));
 
                     }
                 });

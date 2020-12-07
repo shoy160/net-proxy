@@ -11,7 +11,7 @@ import io.netty.channel.ChannelPipeline;
  */
 public class DefaultChannelAdapter implements ChannelAdapter {
     @Override
-    public Object onFrontend(ByteBuf buf, Channel channel) {
+    public ByteBuf onFrontend(ByteBuf buf, Channel channel) {
         return buf;
     }
 
@@ -26,7 +26,7 @@ public class DefaultChannelAdapter implements ChannelAdapter {
     }
 
     @Override
-    public Object onBackend(ByteBuf buf, Channel channel) {
+    public ByteBuf onBackend(ByteBuf buf, Channel channel) {
         return buf;
     }
 }

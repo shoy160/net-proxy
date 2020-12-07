@@ -1,9 +1,14 @@
 package com.github.shoy160.proxy.util;
 
+import cn.hutool.core.io.BufferUtil;
 import cn.hutool.core.util.HexUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * @author shay
@@ -96,5 +101,59 @@ public class BufferUtils {
             length = sources.length;
         }
         System.arraycopy(sources, 0, bytes, start, length);
+    }
+
+    public static int bytesToInt(byte[] bytes) {
+        int value = 0;
+        int length = bytes.length;
+        if (length > 4) {
+            //防止溢出
+            length = 4;
+        }
+        for (int i = length - 1; i >= 0; i--) {
+            value += (bytes[i] & 0xFF) << (length - i - 1) * 8;
+        }
+        return value;
+    }
+
+    public static long bytesToLong(byte[] bytes) {
+        return new BigInteger(bytes).longValue();
+    }
+
+    public static String bytesToString(byte[] bytes, Charset charset) {
+        if (charset == null) {
+            charset = Charset.defaultCharset();
+        }
+        return new String(bytes, charset);
+    }
+
+    private static byte[] simple(byte[] bytes) {
+        ByteBuf buf = Unpooled.wrappedBuffer(bytes);
+        for (byte aByte : bytes) {
+            if (aByte == 0) {
+                buf.readByte();
+            } else {
+                break;
+            }
+        }
+        return ByteBufUtil.getBytes(buf);
+    }
+
+    public static byte[] intToBytes(int value) {
+        byte[] result = new byte[4];
+        for (int i = 3; i >= 0; i--) {
+            result[i] = (byte) (value & 0xFF);
+            value >>= 8;
+        }
+        return simple(result);
+    }
+
+    public static byte[] longToBytes(long value) {
+        byte[] result = new byte[8];
+        for (int i = 7; i >= 0; i--) {
+            result[i] = (byte) (value & 0xFF);
+            value >>= 8;
+        }
+        return simple(result);
     }
 }

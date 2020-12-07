@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  * @date 2020/12/2
  */
 @Slf4j
-//@Component
+@Component
 public class TelnetChannelAdapter implements ChannelAdapter {
     private final static String ENTER_HEX = "0d0a";
     private final TransferManager transferManager;
@@ -26,7 +26,7 @@ public class TelnetChannelAdapter implements ChannelAdapter {
     }
 
     @Override
-    public Object onFrontend(ByteBuf buf, Channel channel) {
+    public ByteBuf onFrontend(ByteBuf buf, Channel channel) {
         String hex = BufferUtils.toHex(buf);
         log.info("cmd:{}", hex);
         channel.attr(Constants.ATTR_STDOUT).set(hex.equals(ENTER_HEX));
@@ -44,7 +44,7 @@ public class TelnetChannelAdapter implements ChannelAdapter {
     }
 
     @Override
-    public Object onBackend(ByteBuf buf, Channel channel) {
+    public ByteBuf onBackend(ByteBuf buf, Channel channel) {
         return transferManager.transferMsg(buf, channel);
     }
 }

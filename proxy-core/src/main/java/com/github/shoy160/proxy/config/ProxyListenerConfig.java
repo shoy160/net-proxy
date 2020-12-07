@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProxyListenerConfig {
+    private ProtocolType type = ProtocolType.TCP;
     private String localIp = "*";
     private Integer localPort = 23;
     private String remoteIp = "";
@@ -17,6 +18,6 @@ public class ProxyListenerConfig {
 
     @Override
     public String toString() {
-        return String.format("%s:%d => %s:%d", this.localIp, this.localPort, this.remoteIp, this.remotePort);
+        return String.format("%s://%s:%d => %s:%d", this.type.getName().toLowerCase(), this.localIp, this.localPort, this.remoteIp, this.remotePort);
     }
 }

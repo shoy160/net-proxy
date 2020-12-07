@@ -13,7 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.yunzhicloud.proxy", "com.github.shoy160.proxy"})
 public class TelnetApplication {
-    
+
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(TelnetApplication.class, args);
         applicationContext.registerShutdownHook();

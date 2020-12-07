@@ -1,7 +1,10 @@
 package com.github.shoy160.proxy.util;
 
 import com.yunzhicloud.core.utils.CommonUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -9,7 +12,8 @@ import java.util.Map;
  * @author shay
  * @date 2020/12/2
  */
-public class SpringUtils {
+@Component
+public class SpringUtils implements ApplicationContextAware {
 
     private static ApplicationContext context;
 
@@ -31,9 +35,9 @@ public class SpringUtils {
             }
             return context.getBean(tClass);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            return null;
         }
-        return null;
+
     }
 
     public static Object getBean(String tClass) {
@@ -42,5 +46,10 @@ public class SpringUtils {
 
     public static <T> Map<String, T> getBeans(Class<T> clazz) {
         return context.getBeansOfType(clazz);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        setContext(applicationContext);
     }
 }

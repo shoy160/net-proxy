@@ -1,5 +1,6 @@
 proxy:
   config:
+    type: udp
     remote-ip: 192.168.20.81
     remote-port: 161
     local-port: 8161
