@@ -1,6 +1,8 @@
 package com.github.shoy160.proxy.handler;
 
+import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
+import com.github.shoy160.proxy.config.ProxyListenerConfig;
 import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -16,13 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
 
-    private final String remoteHost;
-    private final int remotePort;
+    private final ProxyListenerConfig config;
     private Channel outboundChannel;
 
-    public TcpProxyFrontendHandler(String remoteHost, int remotePort) {
-        this.remoteHost = remoteHost;
-        this.remotePort = remotePort;
+    public TcpProxyFrontendHandler(ProxyListenerConfig config) {
+        this.config = config;
     }
 
     private void createOutChannel(final Channel inboundChannel) {
@@ -34,16 +34,16 @@ public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
                 .handler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel channel) {
-                        ChannelAdapter adapter = SpringUtils.getObject(ChannelAdapter.class);
-                        if (adapter != null) {
-                            adapter.onBackendPipeline(channel.pipeline());
+                        ChannelPipeline pipeline = channel.pipeline();
+                        if (inboundChannel.hasAttr(Constants.ATTR_ADAPTER)) {
+                            ChannelAdapter adapter = inboundChannel.attr(Constants.ATTR_ADAPTER).get();
+                            adapter.onBackendPipeline(pipeline);
                         }
-                        channel.pipeline()
-                                .addLast(new TcpProxyBackendHandler(inboundChannel));
+                        pipeline.addLast(new TcpProxyBackendHandler(inboundChannel));
 
                     }
                 });
-        ChannelFuture f = b.connect(remoteHost, remotePort);
+        ChannelFuture f = b.connect(this.config.getRemoteIp(), this.config.getRemotePort());
         outboundChannel = f.channel();
         f.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
@@ -57,6 +57,7 @@ public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         final Channel inboundChannel = ctx.channel();
+        this.config.attrAdapter(inboundChannel);
         createOutChannel(inboundChannel);
     }
 
@@ -64,11 +65,8 @@ public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
         if (outboundChannel.isActive()) {
-            if (msg instanceof ByteBuf) {
-                ChannelAdapter adapter = SpringUtils.getObject(ChannelAdapter.class);
-                if (adapter != null) {
-                    adapter.onFrontend((ByteBuf) msg, outboundChannel);
-                }
+            if (msg instanceof ByteBuf && ctx.channel().hasAttr(Constants.ATTR_ADAPTER)) {
+                ctx.channel().attr(Constants.ATTR_ADAPTER).get().onFrontend((ByteBuf) msg, outboundChannel);
             }
             outboundChannel
                     .writeAndFlush(msg)

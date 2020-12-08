@@ -1,12 +1,9 @@
-package com.github.shoy160.proxy.snmp.protocol;
+package com.github.shoy160.proxy.snmp.protocol.variable;
 
 import cn.hutool.core.convert.Convert;
 import com.github.shoy160.proxy.util.BufferUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-
-import java.math.BigInteger;
-import java.nio.charset.Charset;
 
 /**
  * @author shay
@@ -19,7 +16,7 @@ public class SnmpValueVariable extends SnmpVariable implements ValueVariable {
     public final static int TYPE_INT = 0x02;
     public final static int TYPE_STRING = 0x04;
     public final static int TYPE_OID = 0x06;
-    public final static int TYPE_LONG = 0x46;
+    public final static int TYPE_COUNTER64 = 0x46;
 
     @Override
     public Object getValue() {
@@ -45,11 +42,11 @@ public class SnmpValueVariable extends SnmpVariable implements ValueVariable {
                 data[i + 2] = Convert.toByte(ids[i]);
             }
         } else if (getType() == TYPE_INT) {
-            data = BufferUtils.intToBytes((int) value);
-        } else if (getType() == TYPE_LONG) {
-            data = BufferUtils.longToBytes((long) value);
+            data = BufferUtils.fromInt((int) value);
+        } else if (getType() == TYPE_COUNTER64) {
+            data = BufferUtils.fromLong((long) value);
         } else if (getType() == TYPE_STRING) {
-            data = BufferUtils.stringToBytes(value.toString());
+            data = BufferUtils.fromString(value.toString());
         } else {
             data = valueBytes;
         }
@@ -63,11 +60,11 @@ public class SnmpValueVariable extends SnmpVariable implements ValueVariable {
         ByteBuf valueBuf = buf.readSlice(this.getLength());
         this.valueBytes = ByteBufUtil.getBytes(valueBuf);
         if (this.getType() == TYPE_INT) {
-            this.value = BufferUtils.bytesToInt(this.valueBytes);
-        } else if (this.getType() == TYPE_LONG) {
-            this.value = BufferUtils.bytesToLong(this.valueBytes);
+            this.value = BufferUtils.toInt(this.valueBytes);
+        } else if (this.getType() == TYPE_COUNTER64) {
+            this.value = BufferUtils.toLong(this.valueBytes);
         } else if (this.getType() == TYPE_STRING) {
-            this.value = BufferUtils.bytesToString(this.valueBytes, null);
+            this.value = BufferUtils.toString(this.valueBytes, null);
         } else if (this.getType() == TYPE_OID) {
             StringBuilder sb = new StringBuilder("1.3.");
             for (int i = 2; i < getLength(); i++) {

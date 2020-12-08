@@ -17,6 +17,5 @@
         <module>telnet-proxy</module>
         <module>snmp-proxy</module>
         <module>proxy-core</module>
-        <module>snmp4j</module>
     </modules>
 </project>

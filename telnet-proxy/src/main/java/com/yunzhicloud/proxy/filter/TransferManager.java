@@ -1,7 +1,6 @@
 package com.yunzhicloud.proxy.filter;
 
 import com.github.shoy160.proxy.util.BufferUtils;
-import com.github.shoy160.proxy.util.SpringUtils;
 import com.yunzhicloud.proxy.config.TransferConfig;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -25,17 +24,15 @@ import java.util.regex.Pattern;
 public class TransferManager {
     private final Map<String, ProxyFilter> filters;
     private String ethName;
-    private final TransferConfig config;
     private final Pattern ETH_REGEX;
 
     public TransferManager(TransferConfig config, Map<String, ProxyFilter> filters) {
         this.filters = filters;
-        this.config = config;
         ETH_REGEX = Pattern.compile(config.getInterfaceRegex().concat("\\s+current\\s+state\\s+:\\s+UP"), Pattern.DOTALL);
     }
 
-    public ByteBuf transferMsg(ByteBuf buf, Channel channel) {
-        String content = BufferUtils.byteToString(buf);
+    public ByteBuf transferMsg(ByteBuf buf) {
+        String content = BufferUtils.toString(buf);
         Matcher matcher = ETH_REGEX.matcher(content);
         if (matcher.find()) {
             ethName = matcher.group(1);
@@ -47,6 +44,6 @@ public class TransferManager {
             }
         }
         ReferenceCountUtil.release(buf);
-        return Unpooled.wrappedBuffer(BufferUtils.stringToBytes(content));
+        return Unpooled.wrappedBuffer(BufferUtils.fromString(content));
     }
 }

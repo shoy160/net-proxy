@@ -4,3 +4,4 @@ proxy:
     remote-ip: 192.168.20.81
     remote-port: 161
     local-port: 8161
+    adapter-class-name: com.github.shoy160.proxy.snmp.config.SnmpChannelAdapter

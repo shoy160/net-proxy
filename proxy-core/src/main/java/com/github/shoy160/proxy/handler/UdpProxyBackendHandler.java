@@ -1,5 +1,6 @@
 package com.github.shoy160.proxy.handler;
 
+import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
 import com.github.shoy160.proxy.util.BufferUtils;
 import com.github.shoy160.proxy.util.SpringUtils;
@@ -31,26 +32,25 @@ public class UdpProxyBackendHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof DatagramPacket) {
             DatagramPacket packet = (DatagramPacket) msg;
             ByteBuf content = packet.content();
-            log.info("back read:{}", ByteBufUtil.prettyHexDump(content.copy()));
-            content.resetReaderIndex();
-            ChannelAdapter adapter = SpringUtils.getObject(ChannelAdapter.class);
-            if (adapter != null) {
+            if (inboundContext.channel().hasAttr(Constants.ATTR_ADAPTER)) {
+                ChannelAdapter adapter = inboundContext.channel().attr(Constants.ATTR_ADAPTER).get();
                 content = adapter.onBackend(content, ctx.channel());
             }
             inboundContext
                     .writeAndFlush(new DatagramPacket(content, this.senderAddress));
-            ctx.channel().close();
+            ctx.close();
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
+        ctx.close();
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        log.info("channel unregistered:{}", ctx.channel().remoteAddress());
+        log.info("channel unregistered:{}", ctx.channel().localAddress());
         super.channelUnregistered(ctx);
     }
 }

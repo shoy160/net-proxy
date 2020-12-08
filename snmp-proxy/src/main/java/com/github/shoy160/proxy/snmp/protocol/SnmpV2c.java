@@ -1,7 +1,9 @@
 package com.github.shoy160.proxy.snmp.protocol;
 
+import com.github.shoy160.proxy.snmp.protocol.variable.SnmpOidVariable;
+import com.github.shoy160.proxy.snmp.protocol.variable.SnmpValueVariable;
+import com.github.shoy160.proxy.snmp.protocol.variable.SnmpVariable;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import lombok.Getter;
 import lombok.Setter;

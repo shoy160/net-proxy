@@ -32,7 +32,7 @@ public class LimiterHandler extends ChannelInboundHandlerAdapter {
             Channel channel = ctx.channel();
             Attribute<String> hostAttr = channel.attr(Constants.ATTR_HOST_NAME);
             String hostName = hostAttr.get();
-            String content = BufferUtils.byteToString((ByteBuf) msg);
+            String content = BufferUtils.toString((ByteBuf) msg);
             if (StrUtil.isEmpty(hostName)) {
                 Matcher matcher = HOST_REG.matcher(content);
                 if (matcher.find()) {
@@ -56,8 +56,8 @@ public class LimiterHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf[] limiters = new ByteBuf[]{
                             Unpooled.wrappedBuffer(new byte[]{13, 10}),
                             Unpooled.wrappedBuffer(new byte[]{10}),
-                            Unpooled.wrappedBuffer(BufferUtils.stringToBytes(MORE_STR)),
-                            Unpooled.wrappedBuffer(BufferUtils.stringToBytes(hostName))
+                            Unpooled.wrappedBuffer(BufferUtils.fromString(MORE_STR)),
+                            Unpooled.wrappedBuffer(BufferUtils.fromString(hostName))
                     };
                     channel.pipeline().addFirst(Constants.KEY_LIMITER, new DelimiterBasedFrameDecoder(2048, false, limiters));
                 }

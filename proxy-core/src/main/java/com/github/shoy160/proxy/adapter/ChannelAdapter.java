@@ -13,7 +13,7 @@ public interface ChannelAdapter {
      * 输入消息处理
      *
      * @param buf     buf
-     * @param channel channel
+     * @param channel channel 后端channel
      * @return msg
      */
     ByteBuf onFrontend(ByteBuf buf, Channel channel);

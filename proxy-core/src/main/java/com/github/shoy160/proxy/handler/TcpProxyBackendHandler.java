@@ -1,5 +1,6 @@
 package com.github.shoy160.proxy.handler;
 
+import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
 import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.buffer.ByteBuf;
@@ -28,8 +29,8 @@ public class TcpProxyBackendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
-        ChannelAdapter adapter = SpringUtils.getObject(ChannelAdapter.class);
-        if (adapter != null) {
+        if (inboundChannel.hasAttr(Constants.ATTR_ADAPTER)) {
+            ChannelAdapter adapter = inboundChannel.attr(Constants.ATTR_ADAPTER).get();
             msg = adapter.onBackend((ByteBuf) msg, ctx.channel());
         }
         inboundChannel

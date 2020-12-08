@@ -1,4 +1,4 @@
-package com.github.shoy160.proxy.snmp.protocol;
+package com.github.shoy160.proxy.snmp.protocol.variable;
 
 import com.yunzhicloud.core.utils.CommonUtils;
 

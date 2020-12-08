@@ -1,9 +1,11 @@
 package com.github.shoy160.proxy;
 
+import com.github.shoy160.proxy.adapter.ChannelAdapter;
 import com.github.shoy160.proxy.config.ProtocolType;
 import com.github.shoy160.proxy.config.ProxyListenerConfig;
 import com.github.shoy160.proxy.handler.TcpProxyFrontendHandler;
 import com.github.shoy160.proxy.handler.UdpProxyFrontendHandler;
+import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -26,6 +28,7 @@ import java.net.InetSocketAddress;
 public final class HexDumpProxy implements Runnable {
 
     private final ProxyListenerConfig config;
+    private ChannelAdapter adapter;
     private final static String ANY_IP = "*";
 
     public HexDumpProxy(ProxyListenerConfig config) {
@@ -40,7 +43,7 @@ public final class HexDumpProxy implements Runnable {
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new HexDumpProxyInitializer(this.config.getRemoteIp(), this.config.getRemotePort()))
+                    .childHandler(new HexDumpProxyInitializer(this.config))
                     .childOption(ChannelOption.AUTO_READ, false);
 
             ChannelFuture channelFuture;
@@ -71,10 +74,10 @@ public final class HexDumpProxy implements Runnable {
             bootstrap.group(group)
                     .channel(NioDatagramChannel.class)
                     .localAddress(address)
-                    .handler(new UdpProxyFrontendHandler(this.config.getRemoteIp(), this.config.getRemotePort()));
+                    .handler(new UdpProxyFrontendHandler(this.config));
 
-            ChannelFuture channelFuture = bootstrap.bind(this.config.getLocalPort()).sync();
-            channelFuture.channel().closeFuture().sync();
+            ChannelFuture channelFuture = bootstrap.bind(address).sync();
+            channelFuture.channel().closeFuture().await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -84,6 +87,9 @@ public final class HexDumpProxy implements Runnable {
 
     @Override
     public void run() {
+        if (this.config.getAdapterClassName() != null) {
+            this.adapter = SpringUtils.getObject(this.config.getAdapterClassName());
+        }
         if (this.config.getType() == ProtocolType.TCP) {
             startTcpListener();
         } else if (this.config.getType() == ProtocolType.UDP) {

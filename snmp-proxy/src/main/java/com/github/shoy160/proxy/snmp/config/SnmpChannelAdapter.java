@@ -1,12 +1,10 @@
 package com.github.shoy160.proxy.snmp.config;
 
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.snmp.protocol.SnmpOidVariable;
+import com.github.shoy160.proxy.snmp.protocol.variable.SnmpOidVariable;
 import com.github.shoy160.proxy.snmp.protocol.SnmpV2c;
-import com.github.shoy160.proxy.snmp.protocol.SnmpValueVariable;
-import com.github.shoy160.proxy.snmp.protocol.ValueVariable;
+import com.github.shoy160.proxy.snmp.protocol.variable.SnmpValueVariable;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +34,13 @@ public class SnmpChannelAdapter implements ChannelAdapter {
 
     @Override
     public ByteBuf onBackend(ByteBuf buf, Channel channel) {
-        log.info("filter data");
         SnmpV2c pdu = new SnmpV2c();
         pdu.read(buf);
         log.info("pdu:{}", pdu);
         SnmpValueVariable value = pdu.getValue();
         SnmpOidVariable oid = pdu.getOid();
-        if (value.getType() == SnmpValueVariable.TYPE_LONG && oid.getPort() == 7) {
+        if (value.getType() == SnmpValueVariable.TYPE_COUNTER64 && oid.getPort() == 7) {
+            log.info("filter data");
             pdu.getValue().setValue(123456789L);
             return pdu.write();
         } else {

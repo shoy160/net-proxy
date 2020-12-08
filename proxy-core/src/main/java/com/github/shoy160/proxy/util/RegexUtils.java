@@ -10,7 +10,11 @@ import java.util.regex.Pattern;
 public class RegexUtils {
 
     public static String replace(String regex, CharSequence content, int group, CharSequence replacement) {
-        Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        return replace(pattern, content, group, replacement);
+    }
+
+    public static String replace(Pattern pattern, CharSequence content, int group, CharSequence replacement) {
         Matcher matcher = pattern.matcher(content);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {

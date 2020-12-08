@@ -1,6 +1,5 @@
 package com.github.shoy160.proxy.util;
 
-import cn.hutool.core.io.BufferUtil;
 import cn.hutool.core.util.HexUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -40,7 +39,7 @@ public class BufferUtils {
         return HexUtil.encodeHexStr(bytes);
     }
 
-    public static String byteToString(ByteBuf buf) {
+    public static String toString(ByteBuf buf) {
         initChars();
         int length = buf.readableBytes();
         StringBuilder content = new StringBuilder();
@@ -52,7 +51,7 @@ public class BufferUtils {
         return content.toString();
     }
 
-    public static String byteToString(byte[] data) {
+    public static String toString(byte[] data) {
         initChars();
         StringBuilder content = new StringBuilder();
         for (byte datum : data) {
@@ -61,7 +60,7 @@ public class BufferUtils {
         return content.toString();
     }
 
-    public static byte[] stringToBytes(String msg) {
+    public static byte[] fromString(String msg) {
         byte[] bytes = new byte[msg.length()];
         final char[] chars = msg.toCharArray();
         for (int i = 0; i < chars.length; i++) {
@@ -70,27 +69,27 @@ public class BufferUtils {
         return bytes;
     }
 
-    public static byte[] combineBytes(byte[] data, String other) {
-        return combineBytes(data, stringToBytes(other));
+    public static byte[] combine(byte[] data, String other) {
+        return combine(data, fromString(other));
     }
 
-    public static byte[] combineBytes(byte[] data, byte[] other) {
+    public static byte[] combine(byte[] data, byte[] other) {
         ByteBuffer buffer = ByteBuffer.allocate(data.length + other.length);
         buffer.put(data);
         buffer.put(other);
         return buffer.array();
     }
 
-    public static void replaceBytes(byte[] bytes, String content, int start) {
-        byte[] sources = stringToBytes(content);
-        replaceBytes(bytes, sources, start, -1);
+    public static void replace(byte[] bytes, String content, int start) {
+        byte[] sources = fromString(content);
+        replace(bytes, sources, start, -1);
     }
 
-    public static void replaceBytes(byte[] bytes, byte[] sources, int start) {
-        replaceBytes(bytes, sources, start, -1);
+    public static void replace(byte[] bytes, byte[] sources, int start) {
+        replace(bytes, sources, start, -1);
     }
 
-    public static void replaceBytes(byte[] bytes, byte[] sources, int start, int length) {
+    public static void replace(byte[] bytes, byte[] sources, int start, int length) {
         if (bytes.length <= start) {
             return;
         }
@@ -103,7 +102,7 @@ public class BufferUtils {
         System.arraycopy(sources, 0, bytes, start, length);
     }
 
-    public static int bytesToInt(byte[] bytes) {
+    public static int toInt(byte[] bytes) {
         int value = 0;
         int length = bytes.length;
         if (length > 4) {
@@ -116,11 +115,11 @@ public class BufferUtils {
         return value;
     }
 
-    public static long bytesToLong(byte[] bytes) {
+    public static long toLong(byte[] bytes) {
         return new BigInteger(bytes).longValue();
     }
 
-    public static String bytesToString(byte[] bytes, Charset charset) {
+    public static String toString(byte[] bytes, Charset charset) {
         if (charset == null) {
             charset = Charset.defaultCharset();
         }
@@ -139,7 +138,7 @@ public class BufferUtils {
         return ByteBufUtil.getBytes(buf);
     }
 
-    public static byte[] intToBytes(int value) {
+    public static byte[] fromInt(int value) {
         byte[] result = new byte[4];
         for (int i = 3; i >= 0; i--) {
             result[i] = (byte) (value & 0xFF);
@@ -148,7 +147,7 @@ public class BufferUtils {
         return simple(result);
     }
 
-    public static byte[] longToBytes(long value) {
+    public static byte[] fromLong(long value) {
         byte[] result = new byte[8];
         for (int i = 7; i >= 0; i--) {
             result[i] = (byte) (value & 0xFF);

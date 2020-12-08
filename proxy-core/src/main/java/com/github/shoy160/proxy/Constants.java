@@ -1,5 +1,6 @@
 package com.github.shoy160.proxy;
 
+import com.github.shoy160.proxy.adapter.ChannelAdapter;
 import io.netty.util.AttributeKey;
 
 /**
@@ -13,4 +14,6 @@ public interface Constants {
      * 开始输出标签
      */
     AttributeKey<Boolean> ATTR_STDOUT = AttributeKey.valueOf("std-out");
+
+    AttributeKey<ChannelAdapter> ATTR_ADAPTER = AttributeKey.valueOf("channel-adapter");
 }

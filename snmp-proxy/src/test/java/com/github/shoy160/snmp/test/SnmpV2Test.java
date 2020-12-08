@@ -30,7 +30,7 @@ public class SnmpV2Test {
 
     @Test
     public void convertTest() {
-        byte[] b = BufferUtils.longToBytes(1252354);
+        byte[] b = BufferUtils.fromLong(1252354);
         log.info("value:{}", b);
     }
 }

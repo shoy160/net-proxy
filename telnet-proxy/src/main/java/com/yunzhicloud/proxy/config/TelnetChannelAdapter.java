@@ -45,6 +45,6 @@ public class TelnetChannelAdapter implements ChannelAdapter {
 
     @Override
     public ByteBuf onBackend(ByteBuf buf, Channel channel) {
-        return transferManager.transferMsg(buf, channel);
+        return transferManager.transferMsg(buf);
     }
 }

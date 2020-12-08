@@ -14,7 +14,7 @@ public class UtilsTest {
 
     @Test
     public void toBytesTest() {
-        byte[] bytes = BufferUtils.stringToBytes("52.1%");
+        byte[] bytes = BufferUtils.fromString("52.1%");
         log.info(BufferUtils.toHex(bytes));
     }
 

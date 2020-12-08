@@ -5,7 +5,6 @@ import com.yunzhicloud.proxy.config.TransferConfig;
 import com.yunzhicloud.proxy.filter.ProxyFilter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Resource;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,9 +14,12 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public abstract class RegexProxyFilter implements ProxyFilter {
-    private final String regex;
+    private final static String ETH_SPACE = "@ETH";
+    private final Pattern pattern;
     private String content;
     private String eth;
+    private Matcher matcher;
+
 
     /**
      * 获取网卡名称
@@ -28,21 +30,36 @@ public abstract class RegexProxyFilter implements ProxyFilter {
         return this.eth;
     }
 
-    @Resource
+    protected Pattern getPattern() {
+        return this.pattern;
+    }
+
+    protected String getGroup(int group) {
+        if (this.matcher != null && this.matcher.groupCount() >= group) {
+            return matcher.group(group);
+        }
+        return "";
+    }
+
     protected TransferConfig config;
 
-    protected RegexProxyFilter(String regex) {
-        this.regex = regex;
+    protected RegexProxyFilter(String regex, TransferConfig config) {
+        this.config = config;
+        if (regex.contains(ETH_SPACE)) {
+            regex = regex.replace(ETH_SPACE, config.getInterfaceRegex());
+        }
+        log.info("{} regex:{}", getClass().getSimpleName(), regex);
+        this.pattern = Pattern.compile(regex, Pattern.DOTALL);
     }
 
     @Override
     public boolean isMatch(String data, String eth, Integer startIndex) {
-        if (CommonUtils.isEmpty(this.regex) || CommonUtils.isEmpty(data)) {
+        if (CommonUtils.isEmpty(data)) {
             return false;
         }
-        Matcher matcher = Pattern.compile(this.regex, Pattern.DOTALL).matcher(data);
-        while (matcher.find()) {
-            if (matcher.start(1) < startIndex) {
+        this.matcher = this.pattern.matcher(data);
+        while (this.matcher.find()) {
+            if (this.matcher.start(1) < startIndex) {
                 continue;
             }
             this.content = data;
