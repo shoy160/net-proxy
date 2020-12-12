@@ -3,6 +3,7 @@ package com.yunzhicloud.proxy.handler;
 import cn.hutool.core.util.StrUtil;
 import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.util.BufferUtils;
+import com.yunzhicloud.proxy.AcConstants;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class LimiterHandler extends ChannelInboundHandlerAdapter {
 
-    private final static Pattern HOST_REG = Pattern.compile("\r\n(<[^>]+>)", Pattern.DOTALL);
+    private final static Pattern HOST_REG = Pattern.compile("[\\r\\n]?(<[^>]+>|[0-9A-Z_]+[#])", Pattern.DOTALL);
     private final static String MORE_STR = "---- More ----";
 
     @Override
@@ -49,13 +50,16 @@ public class LimiterHandler extends ChannelInboundHandlerAdapter {
                         channel.pipeline().remove(handler);
                     }
                     channel.attr(Constants.ATTR_STDOUT).set(false);
+                    channel.attr(AcConstants.ATTR_STA_TAG).set(false);
                 }
                 if (channel.attr(Constants.ATTR_STDOUT).get() && handler == null) {
                     //开始按行处理
                     log.info("add limiters");
                     ByteBuf[] limiters = new ByteBuf[]{
-                            Unpooled.wrappedBuffer(new byte[]{13, 10}),
-                            Unpooled.wrappedBuffer(new byte[]{10}),
+                            Unpooled.wrappedBuffer(new byte[]{0x0d, 0x0a}),
+                            Unpooled.wrappedBuffer(new byte[]{0x0d, 0x00}),
+                            Unpooled.wrappedBuffer(new byte[]{0x0d}),
+                            Unpooled.wrappedBuffer(new byte[]{0x0a}),
                             Unpooled.wrappedBuffer(BufferUtils.fromString(MORE_STR)),
                             Unpooled.wrappedBuffer(BufferUtils.fromString(hostName))
                     };

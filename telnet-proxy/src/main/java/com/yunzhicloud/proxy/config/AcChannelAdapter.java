@@ -2,8 +2,7 @@ package com.yunzhicloud.proxy.config;
 
 import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.util.BufferUtils;
-import com.yunzhicloud.proxy.filter.TransferManager;
+import com.yunzhicloud.proxy.filter.AcFilter;
 import com.yunzhicloud.proxy.handler.LimiterHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -16,20 +15,21 @@ import java.util.Arrays;
 
 /**
  * @author shay
- * @date 2020/12/2
+ * @date 2020/12/12
  */
 @Slf4j
 @Component
-public class TelnetChannelAdapter implements ChannelAdapter {
+public class AcChannelAdapter implements ChannelAdapter {
     private final static byte[][] ENTER_HEX = new byte[][]{
             new byte[]{0x0d, 0x0a},
             new byte[]{0x0d, 0x00},
             new byte[]{0x0d}
     };
-    private final TransferManager transferManager;
 
-    public TelnetChannelAdapter(TransferManager transferManager) {
-        this.transferManager = transferManager;
+    private final AcFilter filter;
+
+    public AcChannelAdapter(AcFilter filter) {
+        this.filter = filter;
     }
 
     @Override
@@ -54,6 +54,6 @@ public class TelnetChannelAdapter implements ChannelAdapter {
 
     @Override
     public ByteBuf onBackend(ByteBuf buf, Channel channel) {
-        return transferManager.transferMsg(buf);
+        return this.filter.transform(buf, channel);
     }
 }

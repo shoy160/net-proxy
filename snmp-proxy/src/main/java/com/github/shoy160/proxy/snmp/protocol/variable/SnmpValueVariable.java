@@ -1,6 +1,6 @@
 package com.github.shoy160.proxy.snmp.protocol.variable;
 
-import cn.hutool.core.convert.Convert;
+import com.github.shoy160.proxy.snmp.helper.SnmpHelper;
 import com.github.shoy160.proxy.util.BufferUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -16,6 +16,7 @@ public class SnmpValueVariable extends SnmpVariable implements ValueVariable {
     public final static int TYPE_INT = 0x02;
     public final static int TYPE_STRING = 0x04;
     public final static int TYPE_OID = 0x06;
+    public final static int TYPE_COUNTER = 0x41;
     public final static int TYPE_COUNTER64 = 0x46;
 
     @Override
@@ -34,13 +35,7 @@ public class SnmpValueVariable extends SnmpVariable implements ValueVariable {
         byte[] data;
         if (getType() == TYPE_OID) {
             String oid = this.value.toString();
-            String[] ids = oid.substring(3).split(".");
-            data = new byte[ids.length + 2];
-            data[0] = 0x2B;
-            data[1] = 0x06;
-            for (int i = 0; i < ids.length; i++) {
-                data[i + 2] = Convert.toByte(ids[i]);
-            }
+            data = SnmpHelper.encodeObjectId(oid);
         } else if (getType() == TYPE_INT) {
             data = BufferUtils.fromInt((int) value);
         } else if (getType() == TYPE_COUNTER64) {
@@ -66,11 +61,7 @@ public class SnmpValueVariable extends SnmpVariable implements ValueVariable {
         } else if (this.getType() == TYPE_STRING) {
             this.value = BufferUtils.toString(this.valueBytes, null);
         } else if (this.getType() == TYPE_OID) {
-            StringBuilder sb = new StringBuilder("1.3.");
-            for (int i = 2; i < getLength(); i++) {
-                sb.append(String.format("%d.", valueBytes[i]));
-            }
-            this.value = sb.toString().substring(0, sb.length() - 1);
+            this.value = SnmpHelper.decodeObjectId(this.valueBytes);
         } else {
             this.value = valueBytes;
         }

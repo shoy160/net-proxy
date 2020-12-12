@@ -1,5 +1,6 @@
 package com.github.shoy160.snmp.test;
 
+import com.github.shoy160.proxy.snmp.helper.SnmpHelper;
 import com.github.shoy160.proxy.snmp.protocol.SnmpV2c;
 import com.github.shoy160.proxy.util.BufferUtils;
 import io.netty.buffer.ByteBuf;
@@ -32,5 +33,18 @@ public class SnmpV2Test {
     public void convertTest() {
         byte[] b = BufferUtils.fromLong(1252354);
         log.info("value:{}", b);
+    }
+
+    @Test
+    public void oidTest() {
+        byte[] data = new byte[]{0x2b, 0x06, 0x01, 0x02, 0x01, 0x1f, 0x01, 0x01, 0x01, 0x0a, -126, 0x3b};
+        log.info("before hex:\t{}", BufferUtils.toHex(data));
+        String oid = SnmpHelper.decodeObjectId(data);
+        log.info("oid:\t{}", oid);
+        oid = oid.replace(".31", ".325");
+        data = SnmpHelper.encodeObjectId(oid);
+        log.info("after hex:\t{}", BufferUtils.toHex(data));
+        oid = SnmpHelper.decodeObjectId(data);
+        log.info("oid:\t{}", oid);
     }
 }

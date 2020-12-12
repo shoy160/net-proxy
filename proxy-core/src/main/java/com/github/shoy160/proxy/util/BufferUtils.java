@@ -1,6 +1,7 @@
 package com.github.shoy160.proxy.util;
 
 import cn.hutool.core.util.HexUtil;
+import cn.hutool.core.util.StrUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -8,6 +9,9 @@ import io.netty.buffer.Unpooled;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author shay
@@ -36,7 +40,25 @@ public class BufferUtils {
     }
 
     public static String toHex(byte[] bytes) {
-        return HexUtil.encodeHexStr(bytes);
+        return toHex(bytes, " ", false);
+    }
+
+    public static String toHex(byte[] bytes, String delimiter, boolean lowerCase) {
+        String strHex;
+        StringBuilder sb = new StringBuilder();
+        for (byte aByte : bytes) {
+            strHex = Integer.toHexString(aByte & 0xFF);
+            strHex = strHex.length() == 1 ? "0".concat(strHex) : strHex;
+            sb.append(strHex);
+            if (StrUtil.isNotEmpty(delimiter)) {
+                sb.append(delimiter);
+            }
+        }
+        strHex = sb.toString();
+        if (StrUtil.isNotEmpty(delimiter)) {
+            strHex = strHex.substring(0, strHex.length() - delimiter.length());
+        }
+        return lowerCase ? strHex.toLowerCase() : strHex.toUpperCase();
     }
 
     public static String toString(ByteBuf buf) {
@@ -127,15 +149,14 @@ public class BufferUtils {
     }
 
     private static byte[] simple(byte[] bytes) {
-        ByteBuf buf = Unpooled.wrappedBuffer(bytes);
-        for (byte aByte : bytes) {
-            if (aByte == 0) {
-                buf.readByte();
-            } else {
+        int start = 0;
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] > 0) {
+                start = i;
                 break;
             }
         }
-        return ByteBufUtil.getBytes(buf);
+        return start > 0 ? Arrays.copyOfRange(bytes, start, bytes.length) : bytes;
     }
 
     public static byte[] fromInt(int value) {
@@ -154,5 +175,13 @@ public class BufferUtils {
             value >>= 8;
         }
         return simple(result);
+    }
+
+    public static byte[] array(List<Byte> byteList) {
+        byte[] data = new byte[byteList.size()];
+        for (int i = 0; i < byteList.size(); i++) {
+            data[i] = byteList.get(i);
+        }
+        return data;
     }
 }

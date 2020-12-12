@@ -28,7 +28,6 @@ import java.net.InetSocketAddress;
 public final class HexDumpProxy implements Runnable {
 
     private final ProxyListenerConfig config;
-    private ChannelAdapter adapter;
     private final static String ANY_IP = "*";
 
     public HexDumpProxy(ProxyListenerConfig config) {
@@ -87,9 +86,6 @@ public final class HexDumpProxy implements Runnable {
 
     @Override
     public void run() {
-        if (this.config.getAdapterClassName() != null) {
-            this.adapter = SpringUtils.getObject(this.config.getAdapterClassName());
-        }
         if (this.config.getType() == ProtocolType.TCP) {
             startTcpListener();
         } else if (this.config.getType() == ProtocolType.UDP) {

@@ -1,7 +1,7 @@
 proxy:
   config:
     type: udp
-    remote-ip: 192.168.20.81
+    remote-ip: 172.20.0.2
     remote-port: 161
     local-port: 8161
     adapter-class-name: com.github.shoy160.proxy.snmp.config.SnmpChannelAdapter

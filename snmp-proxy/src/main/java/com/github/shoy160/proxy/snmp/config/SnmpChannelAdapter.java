@@ -4,9 +4,12 @@ import com.github.shoy160.proxy.adapter.ChannelAdapter;
 import com.github.shoy160.proxy.snmp.protocol.variable.SnmpOidVariable;
 import com.github.shoy160.proxy.snmp.protocol.SnmpV2c;
 import com.github.shoy160.proxy.snmp.protocol.variable.SnmpValueVariable;
+import com.github.shoy160.proxy.util.BufferUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
+import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +45,7 @@ public class SnmpChannelAdapter implements ChannelAdapter {
         if (value.getType() == SnmpValueVariable.TYPE_COUNTER64 && oid.getPort() == 7) {
             log.info("filter data");
             pdu.getValue().setValue(123456789L);
+            ReferenceCountUtil.release(buf);
             return pdu.write();
         } else {
             buf.resetReaderIndex();
