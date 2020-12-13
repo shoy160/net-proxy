@@ -13,10 +13,11 @@ public interface ChannelAdapter {
      * 输入消息处理
      *
      * @param buf     buf
-     * @param channel channel 后端channel
+     * @param front   front
+     * @param backend backend
      * @return msg
      */
-    ByteBuf onFrontend(ByteBuf buf, Channel channel);
+    ByteBuf onFrontend(ByteBuf buf, Channel front, Channel backend);
 
     /**
      * 输出流程线
@@ -37,8 +38,9 @@ public interface ChannelAdapter {
      * 输出消息处理
      *
      * @param buf     buf
-     * @param channel channel
+     * @param front   front
+     * @param backend backend
      * @return msg
      */
-    ByteBuf onBackend(ByteBuf buf, Channel channel);
+    ByteBuf onBackend(ByteBuf buf, Channel front, Channel backend);
 }

@@ -3,7 +3,6 @@ package com.github.shoy160.proxy.handler;
 import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
 import com.github.shoy160.proxy.config.ProxyListenerConfig;
-import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -19,37 +18,37 @@ import lombok.extern.slf4j.Slf4j;
 public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
 
     private final ProxyListenerConfig config;
-    private Channel outboundChannel;
+    private Channel backendChannel;
 
     public TcpProxyFrontendHandler(ProxyListenerConfig config) {
         this.config = config;
     }
 
-    private void createOutChannel(final Channel inboundChannel) {
+    private void createOutChannel(final Channel frontChannel) {
         Bootstrap b = new Bootstrap();
-        log.info("channel :{}", inboundChannel.getClass().getName());
-        b.group(inboundChannel.eventLoop())
-                .channel(inboundChannel.getClass())
+        log.info("channel :{}", frontChannel.getClass().getName());
+        b.group(frontChannel.eventLoop())
+                .channel(frontChannel.getClass())
                 .option(ChannelOption.AUTO_READ, false)
                 .handler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel channel) {
                         ChannelPipeline pipeline = channel.pipeline();
-                        if (inboundChannel.hasAttr(Constants.ATTR_ADAPTER)) {
-                            ChannelAdapter adapter = inboundChannel.attr(Constants.ATTR_ADAPTER).get();
+                        if (frontChannel.hasAttr(Constants.ATTR_ADAPTER)) {
+                            ChannelAdapter adapter = frontChannel.attr(Constants.ATTR_ADAPTER).get();
                             adapter.onBackendPipeline(pipeline);
                         }
-                        pipeline.addLast(new TcpProxyBackendHandler(inboundChannel));
+                        pipeline.addLast(new TcpProxyBackendHandler(frontChannel));
 
                     }
                 });
         ChannelFuture f = b.connect(this.config.getRemoteIp(), this.config.getRemotePort());
-        outboundChannel = f.channel();
+        backendChannel = f.channel();
         f.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
-                inboundChannel.read();
+                frontChannel.read();
             } else {
-                inboundChannel.close();
+                frontChannel.close();
             }
         });
     }
@@ -57,18 +56,18 @@ public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         final Channel inboundChannel = ctx.channel();
-        this.config.attrAdapter(inboundChannel);
+        this.config.saveConfig(inboundChannel);
         createOutChannel(inboundChannel);
     }
 
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
-        if (outboundChannel.isActive()) {
+        if (backendChannel.isActive()) {
             if (msg instanceof ByteBuf && ctx.channel().hasAttr(Constants.ATTR_ADAPTER)) {
-                ctx.channel().attr(Constants.ATTR_ADAPTER).get().onFrontend((ByteBuf) msg, outboundChannel);
+                ctx.channel().attr(Constants.ATTR_ADAPTER).get().onFrontend((ByteBuf) msg, ctx.channel(), backendChannel);
             }
-            outboundChannel
+            backendChannel
                     .writeAndFlush(msg)
                     .addListener((ChannelFutureListener) future -> {
                         if (future.isSuccess()) {
@@ -82,8 +81,8 @@ public class TcpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        if (outboundChannel != null) {
-            closeOnFlush(outboundChannel);
+        if (backendChannel != null) {
+            closeOnFlush(backendChannel);
         }
     }
 

@@ -2,7 +2,6 @@ package com.github.shoy160.proxy.handler;
 
 import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -16,10 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TcpProxyBackendHandler extends ChannelInboundHandlerAdapter {
 
-    private final Channel inboundChannel;
+    private final Channel frontChannel;
 
-    public TcpProxyBackendHandler(Channel inboundChannel) {
-        this.inboundChannel = inboundChannel;
+    public TcpProxyBackendHandler(Channel frontChannel) {
+        this.frontChannel = frontChannel;
     }
 
     @Override
@@ -29,11 +28,11 @@ public class TcpProxyBackendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
-        if (inboundChannel.hasAttr(Constants.ATTR_ADAPTER)) {
-            ChannelAdapter adapter = inboundChannel.attr(Constants.ATTR_ADAPTER).get();
-            msg = adapter.onBackend((ByteBuf) msg, ctx.channel());
+        if (frontChannel.hasAttr(Constants.ATTR_ADAPTER)) {
+            ChannelAdapter adapter = frontChannel.attr(Constants.ATTR_ADAPTER).get();
+            msg = adapter.onBackend((ByteBuf) msg, frontChannel, ctx.channel());
         }
-        inboundChannel
+        frontChannel
                 .writeAndFlush(msg)
                 .addListener((ChannelFutureListener) future -> {
                     if (future.isSuccess()) {
@@ -46,7 +45,7 @@ public class TcpProxyBackendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        TcpProxyFrontendHandler.closeOnFlush(inboundChannel);
+        TcpProxyFrontendHandler.closeOnFlush(frontChannel);
     }
 
     @Override

@@ -2,10 +2,8 @@ package com.github.shoy160.proxy.handler;
 
 import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.util.BufferUtils;
-import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
@@ -19,11 +17,11 @@ import java.net.InetSocketAddress;
 @Slf4j
 public class UdpProxyBackendHandler extends ChannelInboundHandlerAdapter {
 
-    private final ChannelHandlerContext inboundContext;
+    private final ChannelHandlerContext frontChannelContext;
     private final InetSocketAddress senderAddress;
 
     public UdpProxyBackendHandler(ChannelHandlerContext inboundContext, InetSocketAddress senderAddress) {
-        this.inboundContext = inboundContext;
+        this.frontChannelContext = inboundContext;
         this.senderAddress = senderAddress;
     }
 
@@ -32,11 +30,12 @@ public class UdpProxyBackendHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof DatagramPacket) {
             DatagramPacket packet = (DatagramPacket) msg;
             ByteBuf content = packet.content();
-            if (inboundContext.channel().hasAttr(Constants.ATTR_ADAPTER)) {
-                ChannelAdapter adapter = inboundContext.channel().attr(Constants.ATTR_ADAPTER).get();
-                content = adapter.onBackend(content, ctx.channel());
+            Channel frontChannel = frontChannelContext.channel();
+            if (frontChannel.hasAttr(Constants.ATTR_ADAPTER)) {
+                ChannelAdapter adapter = frontChannel.attr(Constants.ATTR_ADAPTER).get();
+                content = adapter.onBackend(content, frontChannel, ctx.channel());
             }
-            inboundContext
+            frontChannelContext
                     .writeAndFlush(new DatagramPacket(content, this.senderAddress));
             ctx.close();
         }

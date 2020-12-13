@@ -2,13 +2,9 @@ package com.github.shoy160.proxy.handler;
 
 import com.github.shoy160.proxy.Constants;
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.config.ProxyConfig;
 import com.github.shoy160.proxy.config.ProxyListenerConfig;
-import com.github.shoy160.proxy.util.BufferUtils;
-import com.github.shoy160.proxy.util.SpringUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
@@ -59,7 +55,7 @@ public class UdpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         final Channel channel = ctx.channel();
-        this.config.attrAdapter(channel);
+        this.config.saveConfig(channel);
     }
 
     @Override
@@ -68,7 +64,7 @@ public class UdpProxyFrontendHandler extends ChannelInboundHandlerAdapter {
             DatagramPacket packet = (DatagramPacket) msg;
             if (ctx.channel().hasAttr(Constants.ATTR_ADAPTER)) {
                 ChannelAdapter adapter = ctx.channel().attr(Constants.ATTR_ADAPTER).get();
-                ByteBuf content = adapter.onFrontend(packet.content(), ctx.channel());
+                ByteBuf content = adapter.onFrontend(packet.content(), ctx.channel(), null);
                 packet = packet.replace(content);
             }
             sendMessage(ctx, packet);

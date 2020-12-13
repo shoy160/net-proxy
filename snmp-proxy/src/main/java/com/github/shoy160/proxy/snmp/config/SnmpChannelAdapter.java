@@ -1,12 +1,10 @@
 package com.github.shoy160.proxy.snmp.config;
 
 import com.github.shoy160.proxy.adapter.ChannelAdapter;
-import com.github.shoy160.proxy.snmp.protocol.variable.SnmpOidVariable;
 import com.github.shoy160.proxy.snmp.protocol.SnmpV2c;
+import com.github.shoy160.proxy.snmp.protocol.variable.SnmpOidVariable;
 import com.github.shoy160.proxy.snmp.protocol.variable.SnmpValueVariable;
-import com.github.shoy160.proxy.util.BufferUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.util.ReferenceCountUtil;
@@ -21,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SnmpChannelAdapter implements ChannelAdapter {
     @Override
-    public ByteBuf onFrontend(ByteBuf buf, Channel channel) {
+    public ByteBuf onFrontend(ByteBuf buf, Channel front, Channel backend) {
         return buf;
     }
 
@@ -36,7 +34,7 @@ public class SnmpChannelAdapter implements ChannelAdapter {
     }
 
     @Override
-    public ByteBuf onBackend(ByteBuf buf, Channel channel) {
+    public ByteBuf onBackend(ByteBuf buf, Channel front, Channel backend) {
         SnmpV2c pdu = new SnmpV2c();
         pdu.read(buf);
         log.info("pdu:{}", pdu);

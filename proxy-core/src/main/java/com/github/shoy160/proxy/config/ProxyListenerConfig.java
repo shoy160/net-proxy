@@ -28,7 +28,8 @@ public class ProxyListenerConfig {
         return String.format("%s://%s:%d => %s:%d", this.type.getName().toLowerCase(), this.localIp, this.localPort, this.remoteIp, this.remotePort);
     }
 
-    public void attrAdapter(Channel channel) {
+    public void saveConfig(Channel channel) {
+        channel.attr(Constants.ATTR_PROXY).set(this);
         if (this.adapterClassName != null) {
             ChannelAdapter adapter = SpringUtils.getObject(this.adapterClassName);
             if (adapter != null) {
